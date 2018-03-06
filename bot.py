@@ -1,4 +1,5 @@
 import discord
+import inflect
 from lxml import html
 import requests
 import random
@@ -8,6 +9,8 @@ from discord.ext import commands
 Client = discord.Client()
 bot_prefix= "~"
 client = commands.Bot(command_prefix=bot_prefix)
+global p
+p = inflect.engine()
 itemNames = []
 itemCharacteristics = []
 itemMantissas = []
@@ -30,6 +33,7 @@ async def ping(ctx):
 
 @client.command(pass_context=True)
 async def gimmeSomeHistory(ctx, month, *, day):
+	global p
 	continuePrices = False
 	page = requests.get('https://www.onthisday.com/events/' + month + "/" + day)
 	tree = html.fromstring(page.content)
@@ -37,10 +41,26 @@ async def gimmeSomeHistory(ctx, month, *, day):
 	dates = tree.xpath('/html/body/main/article/div[1]/ul/li/b/a/text()')
 	numFacts = len(facts)
 	if numFacts > 1:
+		randNum = random.randint(0,numFacts - 1)
+		await client.say("On " + month + " " + p.ordinal(day) + " in " + dates[randNum] + ":" + facts[randNum])
+	elif numFacts == 0:
+		personOfInterest = tree.xpath('/html/body/main/article/div[2]/div/div/div[1]/p/a[2]/text()')
+		fact = tree.xpath('/html/body/main/article/div[2]/div/div/div[1]/p/text()')
+		date = tree.xpath('/html/body/main/article/div[2]/div/div/div[1]/p/a[1]/text()')
+		facts = tree.xpath('/html/body/main/article/div[3]/ul/li/text()')
+		dates = tree.xpath('/html/body/main/article/div[3]/ul/li/b/a/text()')
+		numFacts = len(facts)
+		numFact = len(fact)
 		randNum = random.randint(0,numFacts)
-		await client.say("On " + month + " " + day + " in " + dates[randNum] + ":" + facts[randNum])
+		if numFacts == 0:
+			if numFact > 0:
+				await client.say("On " + month + " " + p.ordinal(day) + " in " + date[0] + ":" + fact[0])
+		elif numFacts == 1:
+			await client.say("On " + month + " " + p.ordinal(day) + " in " + dates[0] + ":" + facts[0])
+		else:
+			await client.say("On " + month + " " + p.ordinal(day) + " in " + dates[randNum] + ":" + facts[randNum])
 	else:
-		await client.say("On " + month + " " + day + " in " + dates[0] + ":" + facts[0])
+		await client.say("On " + month + " " + p.ordinal(day) + " in " + dates[0] + ":" + facts[0])
 
 @client.command(pass_context=True)
 async def Y(ctx):
