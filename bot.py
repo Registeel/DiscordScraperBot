@@ -1,5 +1,6 @@
 import discord
 import inflect
+import config as cfg
 from lxml import html
 import requests
 import random
@@ -99,5 +100,5 @@ async def searchNewegg(ctx, *, item):
 	await client.say("Would you like me to show you the next best match? (~Y/~n)")
 
 
-client.run("")
+client.run(cfg.token['token'])
 
