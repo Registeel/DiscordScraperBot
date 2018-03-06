@@ -8,12 +8,17 @@ from discord.ext import commands
 Client = discord.Client()
 bot_prefix= "~"
 client = commands.Bot(command_prefix=bot_prefix)
-continuePrices = False
-currentItem = 0
+itemNames = []
+itemCharacteristics = []
+itemMantissas = []
 
 @client.event
 async def on_ready():
 	print("Bot Online!")
+	global continuePrices
+	continuePrices = False
+	global currentItem
+	currentItem = 0
 	print("Name: ()".format(client.user.name))
 	print("ID: ()".format(client.user.id))
 
@@ -39,19 +44,40 @@ async def gimmeSomeHistory(ctx, month, *, day):
 
 @client.command(pass_context=True)
 async def Y(ctx):
-	await client.say("I got nuffin")
+	global continuePrices
+	global currentItem
+	if continuePrices and currentItem < len(itemNames):
+		await client.say("I found " + itemNames[currentItem][0] + "\nfor $" + itemCharacteristics[currentItem][0] + "" + itemMantissas[currentItem][0])
+		currentItem += 1
+		await client.say("Would you like me to show you the next best match? (Y/n)")
+	elif currentItem == len(itemNames):
+		await client.say("End of top ten elements in search")
+		continuePrices = False
+		currentItem = 0
 
 @client.command(pass_context=True)
 async def searchNewegg(ctx, *, item):
+	global continuePrices
+	global currentItem
+	currentItem = 0
+	continuePrices = False
 	searchURL = "https://www.newegg.ca/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" + item + "=-1&isNodeId=1";
 	page = requests.get(searchURL)
 	tree = html.fromstring(page.content)
-	firstItemName = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/a/text()')
-	firstItemCharacteristic = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div[2]/ul/li[3]/strong/text()')
-	firstItemMantissa = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div[2]/ul/li[3]/sup/text()')
-	await client.say("I found " + firstItemName[0] + "\nfor $" + firstItemCharacteristic[0] + "" + firstItemMantissa[0])
-	#await client.say("Would you like me to show you the next best match? (Y/n)")
-	#currentItem += 1
+	#itemNames.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/a/text()'))
+	#itemCharacteristics.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div[2]/ul/li[3]/strong/text()'))
+	#itemMantissas.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div[2]/ul/li[3]/sup/text()'))
+
+	for x in range(1, 11):
+		itemNames.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/a/text()'))
+		itemCharacteristics.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/div[2]/ul/li[3]/strong/text()'))
+		itemMantissas.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/div[2]/ul/li[3]/sup/text()'))
+
+	continuePrices = True
+	currentItem += 1
+	await client.say("I found " + itemNames[0][0] + "\nfor $" + itemCharacteristics[0][0] + "" + itemMantissas[0][0])
+	await client.say("Would you like me to show you the next best match? (~Y/~n)")
+
 
 client.run("NDIwMzgzNTY3ODAyMTM4NjM0.DX94Yg.AIdFIqAwx1jKRQTTVFXzMyoSd1E")
 
