@@ -53,5 +53,5 @@ async def searchNewegg(ctx, *, item):
 	#await client.say("Would you like me to show you the next best match? (Y/n)")
 	#currentItem += 1
 
-client.run("NDIwMzgzNTY3ODAyMTM4NjM0.DX94Yg.AIdFIqAwx1jKRQTTVFXzMyoSd1E")
+client.run("")
 
