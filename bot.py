@@ -21,10 +21,13 @@ global p
 #Assign the p variable
 p = inflect.engine()
 #Array for storing newegg item names from searches
+global itemNames
 itemNames = []
 #Array for storing characteristics (numbers before decimal) of newegg items
+global itemCharacteristics
 itemCharacteristics = []
 #Array for storing mantissas (numbers after decimal) of newegg items
+global itemMantissas
 itemMantissas = []
 
 #Runs when bot starts
@@ -87,6 +90,9 @@ async def Y(ctx):
     #Declare the globals we use
     global continuePrices
     global currentItem
+    global itemNames
+    global itemCharacteristics
+    global itemMantissas
     #If the user wants to continue and the currentItem is in the list
     if continuePrices and currentItem < len(itemNames):
         #Print the item and price
@@ -94,7 +100,7 @@ async def Y(ctx):
         #Increment the item counter
         currentItem += 1
         #Prompt for next item
-        await client.say("Would you like me to show you the next best match? (Y/n)")
+        await client.say("Would you like me to show you the next best match? (~Y/~n)")
     #Reached the end of the list
     elif currentItem == len(itemNames):
         await client.say("Last element in search")
@@ -110,6 +116,9 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
     #Declare the globals we need
     global continuePrices
     global currentItem
+    global itemNames
+    global itemCharacteristics
+    global itemMantissas
     #Variable for length of item list
     itemList = 0
     #Declare loop variable
@@ -130,16 +139,15 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
     tree = html.fromstring(page.content)
 
     #Create the list of all matches
-    try:
-        for x in range(1, 11):
-            notExists = not(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/a/text()'))
-            if(not(notExists)):
+    for x in range(1, 11):
+        notExists = not(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/a/text()'))
+        if(not(notExists)):
+            checkItem = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/a/text()')
+            checkItem = checkItem[0].strip()
+            if(len(checkItem[0]) < 5):
                 itemNames.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/a/text()'))
                 itemCharacteristics.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/div[2]/ul/li[3]/strong/text()'))
                 itemMantissas.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/div[2]/ul/li[3]/sup/text()'))
-    except:
-        #Does nothing, just filler
-        error = 0
 
     #Turn on the continue prices
     continuePrices = True
@@ -152,11 +160,12 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
         continuePrices = False
         currentItem = 0
         #Output what was found to users
-        await client.say("Your search of " + itemStringDisplay + " returned:\n" + itemNames[0][0] + "\nfor $" + itemCharacteristics[0][0] + "" + itemMantissas[0][0] + "Num items: " + str(itemList))
+        await client.say("Your search of " + itemStringDisplay + " returned:\n" + itemNames[0][0] + "\nfor $" + itemCharacteristics[0][0] + "" + itemMantissas[0][0])
         await client.say("End of matches")
     elif itemList > 0:
+        continuePrices = True
         #Output what was found to users
-        await client.say("Your search of " + itemStringDisplay + " returned:\n" + itemNames[0][0] + "\nfor $" + itemCharacteristics[0][0] + "" + itemMantissas[0][0] + "Num items: " + str(itemList))
+        await client.say("Your search of " + itemStringDisplay + " returned:\n" + itemNames[0][0] + "\nfor $" + itemCharacteristics[0][0] + "" + itemMantissas[0][0])
         #Prompt users to see if they would like the next best match
         await client.say("Would you like me to show you the next best match? (~Y/~n)")
 
