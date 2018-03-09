@@ -156,45 +156,46 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
     #Get number of items returned from search
     itemList = len(itemNames)
 
-    await client.say("=========================")
-    await client.say("=  Results For Search   =")
+    await client.say("`=========================`")
+    await client.say("`=  Results For Search   =`")
+    await client.say("`=========================`")
     for x in range(0, len(itemNames)):
-        print(str(x+1) + " loop")
         stringLength = len(itemNames[x][0])
         string = itemNames[x][0]
-        print("name is " + string)
-        print("stringlength is " + str(stringLength))
-        counter = 23
+        counter = 0
         while (counter < stringLength):
-            print("counter = " + str(counter))
-            print("StringLength = " + str(stringLength))
             if (stringLength-counter) < 23 and (stringLength-counter) > 0:
-                print("NamesLength = " + str(stringLength-counter))
-                spaceString = string[counter-(stringLength-counter):counter]
-                spaceLength = (23 - (stringLength-counter))
+                spaceLength = (23 - (stringLength-counter)) + 1
+                spaceString = "`="
+                for z in range(1, int(spaceLength/2)+1):
+                    spaceString += " "
+                spaceString += string[(counter):(stringLength)]
+                for a in range(1, int(spaceLength/2)+1):
+                    spaceString += " "
+                spaceString += "=`"
+                await client.say(spaceString)
                 counter += (stringLength-counter)
-                for z in range(1, spaceLength):
-                    spaceString += "*"
-                print(spaceString)
             else:
-                print("itemNameLength is: " + str(len(string)))
-                printString = (string[0:counter])
-                print("=" + printString + "=")
-                itemNames[x] = string[:counter]
                 counter += 23
+                startStringIndex = 0
+                if(counter > 23):
+                    startStringIndex = counter-23
+                printString = (string[startStringIndex:counter])
+                await client.say("`=" + printString + "=`")
+                itemNames[x] = string[:counter]
+        priceLength = len(itemCharacteristics[x][0]) + len(itemMantissas[x][0])
+        priceWhitespace = 23 - priceLength
+        priceString = "`="
+        for i in range(1, int(priceWhitespace/2)+1):
+            priceString += " "
+        priceString += "$" + itemCharacteristics[x][0] + itemMantissas[x][0]
+        for j in range(1, int(priceWhitespace/2)+1):
+            priceString += " "
+        priceString += "=`"
+        await client.say(priceString)
+        await client.say("`=========================`")
 
-        if itemList == 1:
-            continuePrices = False
-            currentItem = 0
-            #Output what was found to users
-            await client.say("Your search of " + itemStringDisplay + " returned:\n" + itemNames[0][0] + "\nfor $" + itemCharacteristics[0][0] + "" + itemMantissas[0][0])
-            await client.say("End of matches")
-        elif itemList > 0:
-            continuePrices = True
-            #Output what was found to users
-            await client.say("Your search of " + itemStringDisplay + " returned:\n" + itemNames[0][0] + "\nfor $" + itemCharacteristics[0][0] + "" + itemMantissas[0][0])
-            #Prompt users to see if they would like the next best match
-            await client.say("Would you like me to show you the next best match? (~Y/~n)")
+        
 
 
 client.run(cfg.token['token'])
