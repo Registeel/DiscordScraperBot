@@ -156,10 +156,17 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
     #Get number of items returned from search
     itemList = len(itemNames)
 
+    print(len(itemNames))
+    print(len(itemCharacteristics))
+    print(len(itemMantissas))
+
     await client.say("`=========================`")
     await client.say("`=  Results For Search   =`")
     await client.say("`=========================`")
     for x in range(0, len(itemNames)):
+        print("item: " + str(len(itemNames[x])))
+        print("charac: " + str(len(itemCharacteristics[x])))
+        print("mantissa: " + str(len(itemMantissas[x])))
         stringLength = len(itemNames[x][0])
         string = itemNames[x][0]
         counter = 0
@@ -170,7 +177,8 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
                 for z in range(1, int(spaceLength/2)+1):
                     spaceString += " "
                 spaceString += string[(counter):(stringLength)]
-                for a in range(1, int(spaceLength/2)+1):
+                spacesLeft = len(spaceString) - len(string[(counter):(stringLength)])-2
+                for a in range(1, spacesLeft):
                     spaceString += " "
                 spaceString += "=`"
                 await client.say(spaceString)
