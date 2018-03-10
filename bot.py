@@ -144,10 +144,11 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
         if(not(notExists)):
             checkItem = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/a/text()')
             checkItem = checkItem[0].strip()
+            print("Checkitem " + checkItem[0])
             if(len(checkItem[0]) < 5):
                 itemNames.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/a/text()'))
-                itemCharacteristics.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/div[2]/ul/li[3]/strong/text()'))
-                itemMantissas.append(tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[' + str(x) + ']/div/div[2]/ul/li[3]/sup/text()'))
+                itemCharacteristics.append(tree.xpath('//li[@class="price-current"]/strong/text()')[x-1])
+                itemMantissas.append(tree.xpath('//li[@class="price-current"]/sup/text()')[x-1])
 
     #Turn on the continue prices
     continuePrices = True
@@ -177,7 +178,8 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
                 for z in range(1, int(spaceLength/2)+1):
                     spaceString += " "
                 spaceString += string[(counter):(stringLength)]
-                spacesLeft = len(spaceString) - len(string[(counter):(stringLength)])-2
+                spacesLeft = 26 - len(spaceString)
+                print("spacestring " + str(len(spaceString)))
                 for a in range(1, spacesLeft):
                     spaceString += " "
                 spaceString += "=`"
@@ -191,13 +193,13 @@ async def searchNewegg(ctx, item, item2="", item3="", item4="", *, item5=""):
                 printString = (string[startStringIndex:counter])
                 await client.say("`=" + printString + "=`")
                 itemNames[x] = string[:counter]
-        priceLength = len(itemCharacteristics[x][0]) + len(itemMantissas[x][0])
+        priceLength = len(itemCharacteristics[x]) + len(itemMantissas[x])
         priceWhitespace = 23 - priceLength
         priceString = "`="
         for i in range(1, int(priceWhitespace/2)+1):
             priceString += " "
-        priceString += "$" + itemCharacteristics[x][0] + itemMantissas[x][0]
-        for j in range(1, int(priceWhitespace/2)+1):
+        priceString += "$" + itemCharacteristics[x] + itemMantissas[x]
+        for j in range(1, int(priceWhitespace/2)):
             priceString += " "
         priceString += "=`"
         await client.say(priceString)
