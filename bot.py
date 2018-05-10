@@ -4,9 +4,7 @@ import requests
 import random
 import config as cfg
 import sys
-from PyQt5.QtGui import *
-from PyQt5.QtCore import *
-from PyQt5.QtWebKit import *
+from selenium import webdriver
 from discord.ext.commands import Bot
 from discord.ext import commands
 
@@ -15,18 +13,9 @@ bot_prefix= "~"
 client = commands.Bot(command_prefix=bot_prefix)
 continuePrices = False
 currentItem = 0
-
-class Render(QWebPage):  
-  def __init__(self, url):  
-    self.app = QApplication(sys.argv)  
-    QWebPage.__init__(self)  
-    self.loadFinished.connect(self._loadFinished)  
-    self.mainFrame().load(QUrl(url))  
-    self.app.exec_()  
-  
-  def _loadFinished(self, result):  
-    self.frame = self.mainFrame()  
-    self.app.quit()
+options = webdriver.ChromeOptions()
+options.add_argument('--headless')
+options.add_argument('--disable-gpu')
 
 @client.event
 async def on_ready():
@@ -56,7 +45,7 @@ async def gimmeSomeHistory(ctx, month, *, day):
 
 @client.command(pass_context=True)
 async def Y(ctx):
-	await client.say("I got nuffin")
+	await client.say("I got muffin")
 
 @client.command(pass_context=True)
 async def searchNewegg(ctx, *, item):
@@ -73,16 +62,18 @@ async def searchNewegg(ctx, *, item):
 
 @client.command(pass_context=True)
 async def checkChrisPubg(ctx):
+    print("Hit this")
+    browser = webdriver.Chrome(chrome_options=options)
     url = 'https://pubgtracker.com/profile/pc/Fuzzyllama/duo?region=na'
-    r = Render(url)
-    result = r.frame.toHtml()
-    archive_links = html.fromstring(str(result.toAscii()))
+    browser.get(url)
+    innerHTML = browser.execute_script("return document.body.innerHTML")
 
-    page = requests.get('https://pubgtracker.com/profile/pc/Fuzzyllama/duo?region=na')
-    tree = html.fromstring(page.content)
-    duoRank = tree.xpath('//span[@class="value"]/text()')
-    print(duoRank)
-    #await client.say("Chris' rank in Duos is " + duoRank)
+    tree = html.fromstring(innerHTML)
+    duoRank = tree.xpath('//*[@id="profile"]/div[2]/div[2]/div[1]/div[2]/div[2]/div[1]/span[2]/text()')
+
+    await client.say("Chris' rank in Pubg Doubles is " + str(duoRank[0]))
+
+    browser.quit()
 
 client.run(cfg.token['token'])
 
