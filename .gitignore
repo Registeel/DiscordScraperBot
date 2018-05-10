@@ -1,3 +1,7 @@
+<<<<<<< HEAD
 *config.py
 *.vs/
 *__pycache__/
+=======
+*config.py
+>>>>>>> master
