@@ -1,6 +1,5 @@
 import discord
 import inflect
-import config as cfg
 from lxml import html
 import requests
 import random
