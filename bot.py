@@ -2,6 +2,11 @@ import discord
 from lxml import html
 import requests
 import random
+import config as cfg
+import sys
+from PyQt5.QtGui import *
+from PyQt5.QtCore import *
+from PyQt5.QtWebKit import *
 from discord.ext.commands import Bot
 from discord.ext import commands
 
@@ -10,6 +15,18 @@ bot_prefix= "~"
 client = commands.Bot(command_prefix=bot_prefix)
 continuePrices = False
 currentItem = 0
+
+class Render(QWebPage):  
+  def __init__(self, url):  
+    self.app = QApplication(sys.argv)  
+    QWebPage.__init__(self)  
+    self.loadFinished.connect(self._loadFinished)  
+    self.mainFrame().load(QUrl(url))  
+    self.app.exec_()  
+  
+  def _loadFinished(self, result):  
+    self.frame = self.mainFrame()  
+    self.app.quit()
 
 @client.event
 async def on_ready():
@@ -43,15 +60,29 @@ async def Y(ctx):
 
 @client.command(pass_context=True)
 async def searchNewegg(ctx, *, item):
-	searchURL = "https://www.newegg.ca/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" + item + "=-1&isNodeId=1";
-	page = requests.get(searchURL)
-	tree = html.fromstring(page.content)
-	firstItemName = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/a/text()')
-	firstItemCharacteristic = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div[2]/ul/li[3]/strong/text()')
-	firstItemMantissa = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div[2]/ul/li[3]/sup/text()')
-	await client.say("I found " + firstItemName[0] + "\nfor $" + firstItemCharacteristic[0] + "" + firstItemMantissa[0])
+    searchURL = "https://www.newegg.ca/Product/ProductList.aspx?Submit=ENE&DEPA=0&Order=BESTMATCH&Description=" + item + "=-1&isNodeId=1";
+    page = requests.get(searchURL)
+    tree = html.fromstring(page.content)
+    firstItemName = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/a/text()')
+    firstItemCharacteristic = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div[2]/ul/li[3]/strong/text()')
+    firstItemMantissa = tree.xpath('//*[@id="bodyArea"]/section/div/div/div[2]/div/div/div/div[2]/div[1]/div[2]/div[2]/div[1]/div/div[2]/ul/li[3]/sup/text()')
+    print(firstItemCharacteristic)
+    await client.say("I found " + firstItemName[0] + "\nfor $" + firstItemCharacteristic[0] + "" + firstItemMantissa[0])
 	#await client.say("Would you like me to show you the next best match? (Y/n)")
 	#currentItem += 1
 
-client.run("")
+@client.command(pass_context=True)
+async def checkChrisPubg(ctx):
+    url = 'https://pubgtracker.com/profile/pc/Fuzzyllama/duo?region=na'
+    r = Render(url)
+    result = r.frame.toHtml()
+    archive_links = html.fromstring(str(result.toAscii()))
+
+    page = requests.get('https://pubgtracker.com/profile/pc/Fuzzyllama/duo?region=na')
+    tree = html.fromstring(page.content)
+    duoRank = tree.xpath('//span[@class="value"]/text()')
+    print(duoRank)
+    #await client.say("Chris' rank in Duos is " + duoRank)
+
+client.run(cfg.token['token'])
 
